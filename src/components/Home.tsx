@@ -4,13 +4,27 @@ import DataTable from './DataTable';
 import { PropagateLoader } from 'react-spinners';
 import toast, { Toaster } from 'react-hot-toast';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount, useWriteContract, useReadContract } from "wagmi";
+import Loader from "@/components/ui/loader";
+import { useToast } from "@/components/ui/use-toast";
+import { rainbowkitConfig } from "@/config/rainbowkitConfig";
+import { waitForTransactionReceipt } from "wagmi/actions";
+import Button from '@/components/ui/button';
+import acutionAbi from '../assets/abis/auction.json';
+import erc20Abi from '../assets/abis/erc20.json';
+import Address from '../assets/address.json';
+
 const HeroSection = () => {
+    const { address } = useAccount();
+    const { toast } = useToast();
     let [loading, setLoading] = useState(false);
     let [aloading, setaLoading] = useState(false);
+
     let [bloading, setbLoading] = useState(false);
-    const [address, setAddress] = useState('');
+    // const [address, setAddress] = useState('');
     const [balance, setBalance] = useState('');
 
+    const { writeContractAsync } = useWriteContract();
     const [openBidSection, setOpenBidSection] = useState(false);
 
     // create auction state start
@@ -24,96 +38,141 @@ const HeroSection = () => {
 
     // hooks 
 
-    useEffect(() => {
-        checkIfWalletConnected()
-
-        getMTKBalance()
-
-        AuctionCounter()
-    }, [])
 
     const shortnetAddress = (address: any) => `${address?.slice(0, 5)}...${address?.length - 4}`;
 
     // write function Start
     const createAuction = async () => {
+        setLoading(true);
         try {
-            //   setLoading(true);
-            //   const contract = await auctionContract();
-            //   const transaction = await contract?.createAuction(description, minBid);
-            //   await transaction.wait();
-            //   setLoading(false);
-            //   toast.success("Auction Created Successfully :)");
-        } catch (error) {
-            console.log(error)
-            toast.error("Transactin Failed! :(")
+            const txHash = await writeContractAsync({
+                abi: acutionAbi,
+                // @ts-ignore
+                address: Address.auction,
+                functionName: "createAuction",
+                args: [description, minBid],
+            });
+            await waitForTransactionReceipt(rainbowkitConfig, {
+                confirmations: 1,
+                hash: txHash,
+            });
+            setLoading(false);
+            toast({
+                title: "Successfully Reported Incident",
+                description: "Refresh the page to see changes",
+            });
+
+        } catch (e) {
+            toast({
+                title: "Error",
+                description: "Failed to Report",
+                variant: "destructive",
+            });
+            setLoading(false);
+            console.error(e);
         }
     }
 
     const approveBid = async () => {
+
+        setLoading(true);
         try {
-            //   setaLoading(true);
-            //   const contract = await erc20Contract();
-            //   const transaction = await contract?.approve(addressData.auction, placeBidAmount);
-            //   await transaction.wait();
-            //   setaLoading(false);
-            //   setBidApporved(true);
-            toast.success("Bid Approved Successfully :)");
-        } catch (error) {
-            console.log(error)
-            toast.error("Transactin Failed! :(")
+            const txHash = await writeContractAsync({
+                abi: erc20Abi,
+                // @ts-ignore
+                address: Address.erc20,
+                functionName: "approve",
+                args: [Address.auction, placeBidAmount],
+            });
+            await waitForTransactionReceipt(rainbowkitConfig, {
+                confirmations: 1,
+                hash: txHash,
+            });
+            setLoading(false);
+            toast({
+                title: "Successfully Reported Incident",
+                description: "Refresh the page to see changes",
+            });
+
+        } catch (e) {
+            toast({
+                title: "Error",
+                description: "Failed to Report",
+                variant: "destructive",
+            });
+            setLoading(false);
+            console.error(e);
         }
     }
 
     const placeBid = async () => {
+
+        setLoading(true);
         try {
-            setbLoading(true);
-            //   const contract = await auctionContract();
-            //   const transaction = await contract?.placeBid(auctionCounter, placeBidAmount);
-            //   await transaction.wait();
-            //   setbLoading(false);
-            //   setBidApporved(true);
-            toast.success("Bid Placed Successfully :)");
-        } catch (error) {
-            console.log(error)
-            toast.error("Transactin Failed! :(")
+            const txHash = await writeContractAsync({
+                abi: acutionAbi,
+                // @ts-ignore
+                address: Address.auction,
+                functionName: "placeBid",
+                args: [Address.auction, placeBidAmount],
+            });
+            await waitForTransactionReceipt(rainbowkitConfig, {
+                confirmations: 1,
+                hash: txHash,
+            });
+            setLoading(false);
+            toast({
+                title: "Successfully Reported Incident",
+                description: "Refresh the page to see changes",
+            });
+
+        } catch (e) {
+            toast({
+                title: "Error",
+                description: "Failed to Report",
+                variant: "destructive",
+            });
+            setLoading(false);
+            console.error(e);
         }
     }
     // write function end 
 
     // Read functions Start 
-    const getMTKBalance = async () => {
-        try {
-            if (!window.ethereum) return alert("No Account Found");
-            const accounts = await window.ethereum.request({
-                method: "eth_accounts",
-            })
+    // const getMTKBalance = async () => {
+    //     try {
+    //         if (!window.ethereum) return alert("No Account Found");
+    //         const accounts = await window.ethereum.request({
+    //             method: "eth_accounts",
+    //         })
 
-            //   const contract = await erc20Contract();
-            //   const transaction = await contract?.balanceOf(accounts[0]);
-            // await transaction.wait();
-            // console.log(transaction);
-            //   setBalance(Number(transaction).toString())
+    //         //   const contract = await erc20Contract();
+    //         //   const transaction = await contract?.balanceOf(accounts[0]);
+    //         // await transaction.wait();
+    //         // console.log(transaction);
+    //         //   setBalance(Number(transaction).toString())
 
-        } catch (error) {
-            console.log(error)
-            toast.error("Transactin Failed! :(")
-        }
-    }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // }
 
-    const AuctionCounter = async () => {
-        try {
+    const { data: tokenBalance, isLoading:balanceLoading, isError:isbalanceFetchError, refetch:fetchBalance } = useReadContract({
+        abi: erc20Abi,
+        // @ts-ignore
+        address: Address.erc20,
+        functionName: "balanceOf",
+        args: [address],
+    });
 
-            //   const contract = await auctionContract();
-            //   const transaction = await contract?.auctionCounter();
-            //   // await transaction.wait();
-            //   // console.log(transaction);
-            //   setAucitonCounter(Number(transaction).toString())
+    const { data:AuctionCounter, isLoading:auctionCounterLoading, isError:counterError, refetch:fetchCounter } = useReadContract({
+        abi: acutionAbi,
+        // @ts-ignore
+        address: Address.auction,
+        functionName: "auctionCounter",
+    });
 
-        } catch (error) {
-            console.log(error)
-            toast.error("Transactin Failed! :(")
-        }
-    }
+  
     // Read function End
 
 
@@ -141,7 +200,7 @@ const HeroSection = () => {
             })
 
             if (accounts.length) {
-                setAddress(accounts[0]);
+                // setAddress(accounts[0]);
 
                 // const web3modal = new Web3Modal();
                 // const connection = await web3modal.connect();
@@ -166,7 +225,7 @@ const HeroSection = () => {
             })
 
             if (accounts.length) {
-                setAddress(accounts[0]);
+                // setAddress(accounts[0]);
 
                 // const web3modal = new Web3Modal();
                 // const connection = await web3modal.connect();
@@ -196,9 +255,9 @@ const HeroSection = () => {
                     {/* <!-- logo - end --> */}
                     {/* <!-- buttons - start --> */}
                     <div className='flex items-center  gap-3'>
-                        <button className="rounded-lg bg-gray-200 shadow-md px-8 py-2 text-center text-sm font-semibold text-gray-500 outline-none ring-indigo-300 transition duration-100 hover:bg-gray-300 focus-visible:ring active:text-gray-700 md:text-base lg:inline-block">{address ? balance : "0"} MTK</button>
+                        <button className="rounded-lg bg-gray-200 shadow-md px-8 py-2 text-center text-sm font-semibold text-gray-500 outline-none ring-indigo-300 transition duration-100 hover:bg-gray-300 focus-visible:ring active:text-gray-700 md:text-base lg:inline-block">{address ? tokenBalance : "0"} MTK</button>
                         <ConnectButton
-                            
+
                             showBalance={false}
                             chainStatus={{ smallScreen: "none", largeScreen: "icon" }}
                         />
@@ -250,7 +309,7 @@ const HeroSection = () => {
                                                     </div>
                                                 ) : (
                                                     <button onClick={createAuction} className=" w-full mt-5 flex items-center justify-center gap-2 rounded-lg bg-blue-500 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-blue-300 transition duration-100 hover:bg-blue-600 focus-visible:ring active:bg-blue-700 md:text-base">
-                                                        create Auction
+                                                        Create Auction
                                                     </button>
                                                 )
                                             }
