@@ -13,7 +13,7 @@ import erc20Abi from '../assets/abis/erc20.json';
 import Address from '../assets/address.json';
 
 const HeroSection = () => {
-    const { address } = useAccount();
+    const { address, chainId } = useAccount();
     const { toast } = useToast();
     let [loading, setLoading] = useState(false);
     let [aloading, setaLoading] = useState(false);
@@ -43,7 +43,7 @@ const HeroSection = () => {
             const txHash = await writeContractAsync({
                 abi: acutionAbi,
                 // @ts-ignore
-                address: Address.auction,
+                address: chainId == 80002 ? Address.auctiona : Address.auction,
                 functionName: "createAuction",
                 args: [description, minBid],
             });
@@ -75,7 +75,7 @@ const HeroSection = () => {
             const txHash = await writeContractAsync({
                 abi: erc20Abi,
                 // @ts-ignore
-                address: Address.erc20,
+                address: chainId == 80002 ? Address.erc20a : Address.erc20,
                 functionName: "approve",
                 args: [Address.auction, placeBidAmount],
             });
@@ -107,7 +107,7 @@ const HeroSection = () => {
             const txHash = await writeContractAsync({
                 abi: acutionAbi,
                 // @ts-ignore
-                address: Address.auction,
+                address: chainId == 80002 ? Address.auctiona : Address.auction,
                 functionName: "placeBid",
                 args: [Number(AuctionCounter), placeBidAmount],
             });

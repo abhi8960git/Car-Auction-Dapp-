@@ -13,6 +13,7 @@ import { Toaster } from 'react-hot-toast';
 import { useReadContract } from 'wagmi';
 import acutionAbi from '../assets/abis/auction.json';
 import Address from '../assets/address.json';
+import { useAccount } from "wagmi";
 
 
 
@@ -22,13 +23,13 @@ import Address from '../assets/address.json';
 
 const DataTable = () => {
   // console.log("this is data", data[0].carDetails);
-
+  const { chainId } = useAccount();
 
 
   const { data: Data } = useReadContract({
     abi: acutionAbi,
     // @ts-ignore
-    address: Address.auction,
+    address: chainId == 80002 ? Address.auctiona : Address.auction,
     functionName: "fetchAllAuctions",
   });
 
@@ -58,7 +59,7 @@ const DataTable = () => {
 
           {
             // @ts-ignore
-            Data.map((data: any) => (
+            Data?.map((data: any) => (
               <TableRow key={data[1]}>
                 <TableCell >{data.carDetails}</TableCell>
                 <TableCell >{Number(data.carId)}</TableCell>
