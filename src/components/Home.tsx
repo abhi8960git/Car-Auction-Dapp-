@@ -1,15 +1,13 @@
 "use client"
-import { useEffect, useState } from 'react';
+import {  useState } from 'react';
 import DataTable from './DataTable';
 import { PropagateLoader } from 'react-spinners';
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useWriteContract, useReadContract } from "wagmi";
-import Loader from "@/components/ui/loader";
 import { useToast } from "@/components/ui/use-toast";
 import { rainbowkitConfig } from "@/config/rainbowkitConfig";
 import { waitForTransactionReceipt } from "wagmi/actions";
-import Button from '@/components/ui/button';
 import acutionAbi from '../assets/abis/auction.json';
 import erc20Abi from '../assets/abis/erc20.json';
 import Address from '../assets/address.json';
@@ -22,8 +20,6 @@ const HeroSection = () => {
 
     let [bloading, setbLoading] = useState(false);
     // const [address, setAddress] = useState('');
-    const [balance, setBalance] = useState('');
-
     const { writeContractAsync } = useWriteContract();
     const [openBidSection, setOpenBidSection] = useState(false);
 
@@ -31,15 +27,14 @@ const HeroSection = () => {
     const [minBid, setMinBid] = useState('');
     const [description, setDescription] = useState('');
     const [placeBidAmount, setPlaceBidAmount] = useState('');
-    const [bidApproved, setBidApporved] = useState(false);
-    const [auctionCounter, setAucitonCounter] = useState('');
+    const [bidApproved] = useState(false);
+    const [auctionCounter] = useState('');
 
     console.log(minBid, description, address, auctionCounter);
 
     // hooks 
 
 
-    const shortnetAddress = (address: any) => `${address?.slice(0, 5)}...${address?.length - 4}`;
 
     // write function Start
     const createAuction = async () => {
@@ -75,7 +70,7 @@ const HeroSection = () => {
 
     const approveBid = async () => {
 
-        setLoading(true);
+        setaLoading(true);
         try {
             const txHash = await writeContractAsync({
                 abi: erc20Abi,
@@ -88,7 +83,7 @@ const HeroSection = () => {
                 confirmations: 1,
                 hash: txHash,
             });
-            setLoading(false);
+            setaLoading(false);
             toast({
                 title: "Successfully Reported Incident",
                 description: "Refresh the page to see changes",
@@ -100,27 +95,27 @@ const HeroSection = () => {
                 description: "Failed to Report",
                 variant: "destructive",
             });
-            setLoading(false);
+            setaLoading(false);
             console.error(e);
         }
     }
 
     const placeBid = async () => {
 
-        setLoading(true);
+        setbLoading(true);
         try {
             const txHash = await writeContractAsync({
                 abi: acutionAbi,
                 // @ts-ignore
                 address: Address.auction,
                 functionName: "placeBid",
-                args: [Address.auction, placeBidAmount],
+                args: [Number(AuctionCounter), placeBidAmount],
             });
             await waitForTransactionReceipt(rainbowkitConfig, {
                 confirmations: 1,
                 hash: txHash,
             });
-            setLoading(false);
+            setbLoading(false);
             toast({
                 title: "Successfully Reported Incident",
                 description: "Refresh the page to see changes",
@@ -132,7 +127,7 @@ const HeroSection = () => {
                 description: "Failed to Report",
                 variant: "destructive",
             });
-            setLoading(false);
+            setbLoading(false);
             console.error(e);
         }
     }
@@ -157,7 +152,7 @@ const HeroSection = () => {
     //     }
     // }
 
-    const { data: tokenBalance, isLoading:balanceLoading, isError:isbalanceFetchError, refetch:fetchBalance } = useReadContract({
+    const { data:tokenBalance} = useReadContract({
         abi: erc20Abi,
         // @ts-ignore
         address: Address.erc20,
@@ -165,12 +160,15 @@ const HeroSection = () => {
         args: [address],
     });
 
-    const { data:AuctionCounter, isLoading:auctionCounterLoading, isError:counterError, refetch:fetchCounter } = useReadContract({
+    console.log("tokenbalance", tokenBalance);
+
+    const { data:AuctionCounter } = useReadContract({
         abi: acutionAbi,
         // @ts-ignore
         address: Address.auction,
         functionName: "auctionCounter",
     });
+    console.log("auction counter", AuctionCounter);
 
   
     // Read function End
@@ -191,55 +189,9 @@ const HeroSection = () => {
     }
 
 
-    const checkIfWalletConnected = async () => {
-        try {
+   
 
-            if (!window.ethereum) return alert("No Account Found");
-            const accounts = await window.ethereum.request({
-                method: "eth_accounts",
-            })
-
-            if (accounts.length) {
-                // setAddress(accounts[0]);
-
-                // const web3modal = new Web3Modal();
-                // const connection = await web3modal.connect();
-                // const provider = new ethers.providers.Web3Provider(connection);
-                // const getBalance = await provider.getBalance(accounts[0]);
-                // const bal = ethers.utils.formatEther(getBalance);
-            } else {
-                alert("No Account Found")
-            }
-
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    const connectWallet = async () => {
-        try {
-
-            if (!window.ethereum) return alert("No Account Found");
-            const accounts = await window.ethereum.request({
-                method: "eth_requestAccounts",
-            })
-
-            if (accounts.length) {
-                // setAddress(accounts[0]);
-
-                // const web3modal = new Web3Modal();
-                // const connection = await web3modal.connect();
-                // const provider = new ethers.providers.Web3Provider(connection);
-                // const getBalance = await provider.getBalance(accounts[0]);
-                // const bal = ethers.utils.formatEther(getBalance);
-            } else {
-                alert("No Account Found")
-            }
-
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    
     return (
         <div className="bg-white pb-6 sm:pb-8 lg:pb-12">
             <div className="mx-auto max-w-screen-2xl px-4 md:px-8">
@@ -255,7 +207,7 @@ const HeroSection = () => {
                     {/* <!-- logo - end --> */}
                     {/* <!-- buttons - start --> */}
                     <div className='flex items-center  gap-3'>
-                        <button className="rounded-lg bg-gray-200 shadow-md px-8 py-2 text-center text-sm font-semibold text-gray-500 outline-none ring-indigo-300 transition duration-100 hover:bg-gray-300 focus-visible:ring active:text-gray-700 md:text-base lg:inline-block">{address ? tokenBalance : "0"} MTK</button>
+                        <button className="rounded-lg bg-gray-200 shadow-md px-8 py-2 text-center text-sm font-semibold text-gray-500 outline-none ring-indigo-300 transition duration-100 hover:bg-gray-300 focus-visible:ring active:text-gray-700 md:text-base lg:inline-block">{Number(tokenBalance)} MTK</button>
                         <ConnectButton
 
                             showBalance={false}
